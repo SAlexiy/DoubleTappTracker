@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+            app:startDestination="@id/habitListFragment">
+
+
+    <fragment android:id="@+id/habitListFragment" android:name="com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.HabitListFragment"
+              android:label="fragment_habit_list" tools:layout="@layout/fragment_habit_list">
+        <action android:id="@+id/action_habitListFragment_to_habitCreatorFragment"
+                app:destination="@id/habitCreatorFragment"/>
+    </fragment>
+    <fragment android:id="@+id/habitCreatorFragment" android:name="com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment"
+              android:label="fragment_habit_creator" tools:layout="@layout/fragment_habit_creator">
+        <action android:id="@+id/action_habitCreatorFragment_to_habitListFragment"
+                app:destination="@id/habitListFragment"/>
+    </fragment>
+</navigation>

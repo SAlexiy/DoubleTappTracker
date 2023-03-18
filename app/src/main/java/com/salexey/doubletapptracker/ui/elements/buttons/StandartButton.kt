@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun standartButton(text: String = "text", textColor: Color = Color.Black,
+fun StandardButton(text: String = "text", textColor: Color = Color.Black,
                    width: Int = 146, height: Int = 36, buttonColor: Color = Color.White,
                    onClick: ()-> Unit){
     Box(

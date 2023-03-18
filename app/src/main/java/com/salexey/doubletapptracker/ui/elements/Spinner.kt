@@ -7,25 +7,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorViewModel
 
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun exposedDropdownMenuBoxTypeHabit(viewModel: HabitCreatorViewModel) {
+fun ExposedDropdownMenuBoxTypeHabit(
+    isExpanded: Boolean, changeSpinnerExpanded: (Boolean) -> Unit,
+    selectedPriority: Int, onPriorityChange: (Int) -> Unit
+) {
     val priorityValueList = arrayOf(0, 1, 2, 3, 4)
 
     val focusedColor = Color.Blue
     val unfocusedColor = Color.Black
     val backgroundColor = Color.Transparent
-
-    val expanded = viewModel.spinnerExpanded.collectAsState()
-    val selectedText = viewModel.priority.collectAsState()
 
     Box(
         modifier = Modifier
@@ -33,17 +31,17 @@ fun exposedDropdownMenuBoxTypeHabit(viewModel: HabitCreatorViewModel) {
             .padding(horizontal = 32.dp, vertical = 5.dp)
     ) {
         ExposedDropdownMenuBox(
-            expanded = expanded.value,
+            expanded = isExpanded,
             onExpandedChange = {
-                viewModel.setSpinnerExpanded(!expanded.value)
+                changeSpinnerExpanded(!isExpanded)
             }
         ) {
             TextField(
-                value = "${selectedText.value}",
+                value = "$selectedPriority",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(text = "Priority") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 colors = TextFieldDefaults.textFieldColors(
                     cursorColor = focusedColor,
                     focusedLabelColor = focusedColor.copy(alpha = 0.54f),
@@ -58,15 +56,15 @@ fun exposedDropdownMenuBoxTypeHabit(viewModel: HabitCreatorViewModel) {
             )
 
             ExposedDropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { viewModel.setSpinnerExpanded(false) }
+                expanded = isExpanded,
+                onDismissRequest = { changeSpinnerExpanded(false) }
             ) {
                 priorityValueList.forEach { item ->
                     DropdownMenuItem(
                         content = { Text(text = item.toString()) },
                         onClick = {
-                            viewModel.setPriority(item)
-                            viewModel.setSpinnerExpanded(false)
+                            onPriorityChange(item)
+                            changeSpinnerExpanded(false)
                         }
                     )
                 }

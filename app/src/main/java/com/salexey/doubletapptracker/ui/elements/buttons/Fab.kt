@@ -17,7 +17,7 @@ import com.salexey.doubletapptracker.R
 
 
 @Composable
-fun fab(onClick: ()-> Unit) {
+fun Fab(onClick: ()-> Unit) {
     Box(modifier = Modifier
         .fillMaxSize(),
         contentAlignment = Alignment.BottomEnd

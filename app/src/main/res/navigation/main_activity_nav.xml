@@ -8,10 +8,16 @@
               android:label="fragment_habit_list" tools:layout="@layout/fragment_habit_list">
         <action android:id="@+id/action_habitListFragment_to_habitCreatorFragment"
                 app:destination="@id/habitCreatorFragment"/>
+        <action android:id="@+id/action_habitListFragment_to_aboutAppFragment" app:destination="@id/aboutAppFragment"/>
     </fragment>
     <fragment android:id="@+id/habitCreatorFragment" android:name="com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment"
               android:label="fragment_habit_creator" tools:layout="@layout/fragment_habit_creator">
         <action android:id="@+id/action_habitCreatorFragment_to_habitListFragment"
                 app:destination="@id/habitListFragment"/>
+    </fragment>
+    <fragment android:id="@+id/aboutAppFragment"
+              android:name="com.salexey.doubletapptracker.ui.screens.mainActivity.aboutapp.AboutAppFragment"
+              android:label="fragment_about_app" tools:layout="@layout/fragment_about_app">
+        <action android:id="@+id/action_aboutAppFragment_to_habitListFragment" app:destination="@id/habitListFragment"/>
     </fragment>
 </navigation>

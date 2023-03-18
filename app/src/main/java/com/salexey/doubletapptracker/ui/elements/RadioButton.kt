@@ -20,10 +20,11 @@ import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitC
 
 
 @Composable
-fun radioButtons(viewModel: HabitCreatorViewModel) {
+fun RadioButtons(
+    selectedType: String, onTypeChange: (String) -> Unit
+) {
 
     val type = listOf("Полезная", "Вредная")
-    val selectedType = viewModel.type.collectAsState()
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(modifier = Modifier
@@ -41,14 +42,14 @@ fun radioButtons(viewModel: HabitCreatorViewModel) {
                     .selectable(
                         interactionSource = interactionSource,
                         indication = null,
-                        selected = (text == selectedType.value),
-                        onClick = { viewModel.setType(text) }
+                        selected = (text == selectedType),
+                        onClick = { onTypeChange(text) }
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
                     colors = RadioButtonDefaults.colors(selectedColor = Color.Blue),
-                    selected = (text == selectedType.value),
+                    selected = (text == selectedType),
                     onClick = null
                 )
 

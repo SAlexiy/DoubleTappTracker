@@ -4,18 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.salexey.doubletapptracker.features.ColorFeatures
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorViewModel
 
 @Composable
-fun selectedColor(viewModel: HabitCreatorViewModel){
-
-    val color = viewModel.color.collectAsState()
+fun SelectedColor(color: Int){
 
     Column(modifier = Modifier
         .padding(horizontal = 30.dp, vertical = 10.dp)
@@ -27,17 +23,17 @@ fun selectedColor(viewModel: HabitCreatorViewModel){
             .padding(bottom = 10.dp)
             .fillMaxWidth()
             .height(80.dp)
-            .background(color = Color(color.value))
+            .background(color = Color(color))
         )
 
 
-        Text("RGB: ${ Color(color.value).red}, " +
-                "${ Color(color.value).green}, " +
-                "${ Color(color.value).blue}")
+        Text("RGB: ${ Color(color).red}, " +
+                "${ Color(color).green}, " +
+                "${ Color(color).blue}")
 
 
-        Text("HSV: ${ ColorFeatures().rgbToHsv(Color(color.value))[0]}, " +
-                "${ ColorFeatures().rgbToHsv(Color(color.value))[1]}, " +
-                "${ ColorFeatures().rgbToHsv(Color(color.value))[2]}")
+        Text("HSV: ${ ColorFeatures().rgbToHsv(Color(color))[0]}, " +
+                "${ ColorFeatures().rgbToHsv(Color(color))[1]}, " +
+                "${ ColorFeatures().rgbToHsv(Color(color))[2]}")
     }
 }

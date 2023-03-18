@@ -7,13 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,13 +25,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.salexey.doubletapptracker.R
+import com.salexey.doubletapptracker.consts.HabitCreatorArgumentsKeys
 import com.salexey.doubletapptracker.datamodel.Habit
 import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.room.HabitRepository
 import com.salexey.doubletapptracker.ui.elements.*
-import com.salexey.doubletapptracker.ui.elements.buttons.standartButton
-import com.salexey.doubletapptracker.ui.elements.list.colorlist.colorPicker
-import com.salexey.doubletapptracker.ui.elements.list.colorlist.selectedColor
+import com.salexey.doubletapptracker.ui.elements.buttons.StandardButton
+import com.salexey.doubletapptracker.ui.elements.list.colorlist.ColorPicker
+import com.salexey.doubletapptracker.ui.elements.list.colorlist.SelectedColor
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -84,32 +82,63 @@ class HabitCreatorFragment : Fragment() {
                         keyboardController?.hide()
                         focusManager.clearFocus(true)
                     },
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                    Text(text = "id: ${viewModel.habit.collectAsState().value.habitId}",
-                        modifier = Modifier.padding(10.dp))
 
-                    nameField(viewModel = viewModel)
+                    val name = viewModel.name.collectAsState()
+                    TextField(
+                        label = "name",
+                        textState = name.value,
+                        onValueChange = {viewModel.setName(it)}
+                    )
 
-                    descriptionField(viewModel = viewModel)
+                    val description = viewModel.description.collectAsState()
+                    TextField(
+                        label = "description",
+                        textState = description.value,
+                        onValueChange = {viewModel.setDescription(it)}
+                    )
 
-                    periodicityField(viewModel = viewModel)
+                    val periodicity = viewModel.periodicity.collectAsState()
+                    TextField(
+                        label = "periodicity",
+                        textState = periodicity.value,
+                        onValueChange = {viewModel.setPeriodicity(it)}
+                    )
 
-                    exposedDropdownMenuBoxTypeHabit(viewModel)
+                    val priority = viewModel.priority.collectAsState()
+                    val spinnerExpanded = viewModel.spinnerExpanded.collectAsState()
+                    ExposedDropdownMenuBoxTypeHabit(
+                        isExpanded = spinnerExpanded.value,
+                        changeSpinnerExpanded = { viewModel.changeSpinnerExpanded(it) },
+                        selectedPriority = priority.value,
+                        onPriorityChange = { viewModel.setPriority(it) }
+                    )
 
-                    radioButtons(viewModel)
+                    val selectedType = viewModel.type.collectAsState()
+                    RadioButtons(
+                        selectedType = selectedType.value,
+                        onTypeChange = {viewModel.setType(it)}
+                    )
 
-                    selectedColor(viewModel)
+                    val color = viewModel.color.collectAsState()
+                    SelectedColor(color = color.value)
 
-                    colorPicker(viewModel)
+                    ColorPicker(onColorChange = {viewModel.setColor(it)})
 
                     //кнопки "удалить" и "сохранить"
+                    val bool = arguments?.getBoolean(HabitCreatorArgumentsKeys.newHabit) ?: false
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 30.dp, vertical = 10.dp),
                         horizontalArrangement =  Arrangement.SpaceAround){
-                        if(!arguments?.getBoolean("newHabit")!!){
-                            standartButton(text = "Удалить", buttonColor = Color.Red) {
+                        if(!bool){
+
+                            StandardButton(
+                                text = resources.getString(R.string.delete),
+                                buttonColor = Color.Red
+                            ) {
                                 viewModel.updateHabit()
 
                                 viewLifecycleOwner.lifecycleScope.launch {
@@ -122,12 +151,12 @@ class HabitCreatorFragment : Fragment() {
                             }
                         }
 
-
-
-                        standartButton(text = "Сохранить") {
+                        StandardButton(
+                            text = resources.getString(R.string.save),
+                        ) {
                             viewModel.updateHabit()
 
-                            if(arguments?.getBoolean("newHabit")!!){
+                            if(bool){
                                 viewLifecycleOwner.lifecycleScope.launch {
                                     habitRepository.insertHabit(viewModel.habit.value)
                                 }
@@ -154,46 +183,33 @@ class HabitCreatorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.setHabit(arguments?.getSerializable("habit") as Habit)
-        viewModel.setName(viewModel.habit.value.name)
-        viewModel.setDescription(viewModel.habit.value.description)
-        viewModel.setPeriodicity(viewModel.habit.value.periodicity)
-        viewModel.setPriority(viewModel.habit.value.priority)
-        viewModel.setColor(viewModel.habit.value.color)
+        val habit = arguments?.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
+
+        viewModel.setParams(habit)
     }
 
 
     companion object{
 
-        fun newInstanceHabitCreatorFragment(habit: Habit) : HabitCreatorFragment{
-            val fragment = HabitCreatorFragment()
+        fun newBundleHabitCreatorFragment(habit: Habit) : Bundle{
             val bundle = Bundle()
 
+            bundle.putSerializable(HabitCreatorArgumentsKeys.habit, habit)
+            bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, false)
 
-            bundle.putSerializable("habit", habit)
-            bundle.putBoolean("newHabit", false)
-
-
-            fragment.arguments = bundle
-
-            return fragment
+            return bundle
         }
 
-        fun newInstanceHabitCreatorFragment() : HabitCreatorFragment{
-            val fragment = HabitCreatorFragment()
+        fun newBundleHabitCreatorFragment() : Bundle{
             val bundle = Bundle()
 
-
-            bundle.putSerializable("habit",
+            bundle.putSerializable(HabitCreatorArgumentsKeys.habit,
                 Habit(
                     habitId = UUID.randomUUID().toString(),
                 ))
-            bundle.putBoolean("newHabit", true)
+            bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, true)
 
-
-            fragment.arguments = bundle
-
-            return fragment
+            return bundle
         }
     }
 }

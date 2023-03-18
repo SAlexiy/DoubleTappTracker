@@ -7,7 +7,7 @@ import com.salexey.doubletapptracker.datamodel.Habit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class HabitCreatorViewModel( ) : ViewModel() {
+class HabitCreatorViewModel() : ViewModel() {
 
     //параметр для сохранения привычки
     private val _habit = MutableStateFlow(Habit(habitId = ""))
@@ -46,8 +46,8 @@ class HabitCreatorViewModel( ) : ViewModel() {
     //параметр для записи периодичности
     private val _periodicity = MutableStateFlow("")
     val periodicity = _periodicity.asStateFlow()
-    fun setPeriodicity(login: String) {
-        _periodicity.value = login
+    fun setPeriodicity(periodicity: String) {
+        _periodicity.value = periodicity
     }
 
 
@@ -60,7 +60,7 @@ class HabitCreatorViewModel( ) : ViewModel() {
 
     private val _spinnerExpanded = MutableStateFlow(false)
     val spinnerExpanded = _spinnerExpanded.asStateFlow()
-    fun setSpinnerExpanded(spinnerExpanded: Boolean) {
+    fun changeSpinnerExpanded(spinnerExpanded: Boolean) {
         _spinnerExpanded.value = spinnerExpanded
     }
 
@@ -76,5 +76,17 @@ class HabitCreatorViewModel( ) : ViewModel() {
     val color = _color.asStateFlow()
     fun setColor(color: Int) {
         _color.value = color
+    }
+
+
+    //обновление всех параметров
+    fun setParams(habit: Habit) {
+        setHabit(habit)
+        setName(habit.name)
+        setDescription(habit.description)
+        setPeriodicity(habit.periodicity)
+        setPriority(habit.priority)
+        setColor(habit.color)
+        setType(habit.type)
     }
 }

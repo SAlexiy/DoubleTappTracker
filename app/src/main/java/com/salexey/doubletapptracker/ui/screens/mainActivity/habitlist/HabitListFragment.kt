@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -14,9 +15,9 @@ import com.salexey.doubletapptracker.R
 import com.salexey.doubletapptracker.datamodel.Habit
 import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.room.HabitRepository
-import com.salexey.doubletapptracker.ui.elements.buttons.fab
-import com.salexey.doubletapptracker.ui.elements.list.habitlist.habitList
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment.Companion.newInstanceHabitCreatorFragment
+import com.salexey.doubletapptracker.ui.elements.buttons.Fab
+import com.salexey.doubletapptracker.ui.elements.list.habitlist.HabitList
+import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment.Companion.newBundleHabitCreatorFragment
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -49,17 +50,21 @@ class HabitListFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_habit_list, container, false).apply {
             findViewById<ComposeView>(R.id.habit_list_compose_view).setContent {
 
-                habitList(viewModel){
-                    findNavController().navigate(
-                        R.id.action_habitListFragment_to_habitCreatorFragment,
-                        viewModel.bundle
-                    )
-                }
+                val habitList = viewModel.habitList.collectAsState()
+                HabitList(
+                    habitList = habitList.value,
+                    onClick = {
+                        findNavController().navigate(
+                            R.id.action_habitListFragment_to_habitCreatorFragment,
+                            it
+                        )
+                    }
+                )
 
-                fab(){
+                Fab(){
                     findNavController().navigate(
                         R.id.action_habitListFragment_to_habitCreatorFragment,
-                        newInstanceHabitCreatorFragment().arguments
+                        newBundleHabitCreatorFragment()
                     )
                 }
 
@@ -76,25 +81,15 @@ class HabitListFragment : Fragment() {
 
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 
 
     companion object{
-
-        fun newInstanceHabitListFragment(habit: Habit) : HabitListFragment {
-            val fragment = HabitListFragment()
+        fun newBundleHabitListFragment(habit: Habit) : Bundle {
             val bundle = Bundle()
-
 
             bundle.putSerializable("habit", habit)
 
-
-            fragment.arguments = bundle
-
-            return fragment
+            return bundle
         }
-
     }
 }

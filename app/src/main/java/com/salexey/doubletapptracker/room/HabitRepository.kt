@@ -13,7 +13,11 @@ class HabitRepository(private val habitDao: HabitDao) {
     }
 
     suspend fun insertHabit(habit: Habit) {
-        return habitDao.insert(habit)
+        return try {
+            habitDao.insert(habit)
+        }catch (e : Exception){
+            habitDao.update(habit)
+        }
     }
 
     suspend fun updateHabit(habit: Habit) {

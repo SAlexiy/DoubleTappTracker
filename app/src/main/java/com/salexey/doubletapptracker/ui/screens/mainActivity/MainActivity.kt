@@ -19,11 +19,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
+
+
         navController = this.findNavController(R.id.mainFragment)
 
-        habitCreatorViewModel = ViewModelProvider(this)[HabitCreatorViewModel::class.java]
-        habitListViewModel = ViewModelProvider(this)[HabitListViewModel::class.java]
+        if(savedInstanceState == null){
 
+            habitCreatorViewModel = ViewModelProvider(this)[HabitCreatorViewModel::class.java]
+            habitListViewModel = ViewModelProvider(this)[HabitListViewModel::class.java]
+
+        }
 
     }
 

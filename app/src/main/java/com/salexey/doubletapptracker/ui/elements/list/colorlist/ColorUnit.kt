@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun colorUnit(hue: Float, onClick: ()-> Unit){
+fun ColorUnit(hue: Float, onClick: ()-> Unit){
 
     Box(modifier = Modifier
         .background(brush = Brush.horizontalGradient(

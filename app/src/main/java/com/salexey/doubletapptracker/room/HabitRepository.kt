@@ -8,6 +8,10 @@ class HabitRepository(private val habitDao: HabitDao) {
         return habitDao.getAll()
     }
 
+    suspend fun getHabitsByType(type: String): MutableList<Habit> {
+        return habitDao.getHabitsByType(type)
+    }
+
     suspend fun getHabit(habitId: String): Habit {
         return habitDao.get(habitId)
     }

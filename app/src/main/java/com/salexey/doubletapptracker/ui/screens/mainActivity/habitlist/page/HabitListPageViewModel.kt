@@ -1,4 +1,4 @@
-package com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist
+package com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.page
 
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
@@ -6,7 +6,7 @@ import com.salexey.doubletapptracker.datamodel.Habit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class HabitListViewModel() : ViewModel() {
+class HabitListPageViewModel() : ViewModel() {
     var bundle: Bundle? = null
 
     private val _login = MutableStateFlow("")

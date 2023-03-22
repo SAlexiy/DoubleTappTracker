@@ -5,15 +5,43 @@
         android:layout_height="match_parent"
         xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
-    <fragment
-            android:name="androidx.navigation.fragment.NavHostFragment"
+    <androidx.drawerlayout.widget.DrawerLayout
+            android:id="@+id/main_drawer_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" app:navGraph="@navigation/main_activity_nav" app:defaultNavHost="true"
-            android:id="@+id/mainFragment" app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="0dp" app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="0dp" android:layout_marginEnd="0dp" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:layout_height="match_parent">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <include
+                    layout="@layout/tool_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            <fragment
+                    android:name="androidx.navigation.fragment.NavHostFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" app:navGraph="@navigation/main_activity_nav" app:defaultNavHost="true"
+                    android:id="@+id/mainFragment" app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginTop="0dp" app:layout_constraintBottom_toBottomOf="parent"
+                    android:layout_marginBottom="0dp" android:layout_marginEnd="0dp" app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+        </LinearLayout>
+
+
+
+        <com.google.android.material.navigation.NavigationView
+                android:id="@+id/nvView"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:background="@android:color/white"
+                app:menu="@menu/drawer_items"
+                app:headerLayout="@layout/main_drawer_header"/>
+
+    </androidx.drawerlayout.widget.DrawerLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

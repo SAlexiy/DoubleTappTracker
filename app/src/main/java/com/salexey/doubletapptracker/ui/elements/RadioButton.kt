@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.salexey.doubletapptracker.consts.values.TypeValues
 import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorViewModel
 
 
@@ -24,7 +25,7 @@ fun RadioButtons(
     selectedType: String, onTypeChange: (String) -> Unit
 ) {
 
-    val type = listOf("Полезная", "Вредная")
+    val type = listOf(TypeValues.positive, TypeValues.negative)
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(modifier = Modifier

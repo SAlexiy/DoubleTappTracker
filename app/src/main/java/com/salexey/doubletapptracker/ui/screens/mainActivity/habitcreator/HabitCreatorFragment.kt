@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.salexey.doubletapptracker.R
-import com.salexey.doubletapptracker.consts.HabitCreatorArgumentsKeys
+import com.salexey.doubletapptracker.consts.keys.HabitCreatorArgumentsKeys
 import com.salexey.doubletapptracker.datamodel.Habit
 import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.room.HabitRepository
@@ -183,15 +183,18 @@ class HabitCreatorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val habit = arguments?.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
+        arguments?.let {
+            viewModel.setParams(
+                it.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
+            )
+        }
 
-        viewModel.setParams(habit)
     }
 
 
     companion object{
 
-        fun newBundleHabitCreatorFragment(habit: Habit) : Bundle{
+        fun newBundle(habit: Habit) : Bundle{
             val bundle = Bundle()
 
             bundle.putSerializable(HabitCreatorArgumentsKeys.habit, habit)
@@ -200,10 +203,11 @@ class HabitCreatorFragment : Fragment() {
             return bundle
         }
 
-        fun newBundleHabitCreatorFragment() : Bundle{
+        fun newBundle() : Bundle{
             val bundle = Bundle()
 
-            bundle.putSerializable(HabitCreatorArgumentsKeys.habit,
+            bundle.putSerializable(
+                HabitCreatorArgumentsKeys.habit,
                 Habit(
                     habitId = UUID.randomUUID().toString(),
                 ))

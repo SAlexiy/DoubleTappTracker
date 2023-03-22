@@ -3,4 +3,10 @@
 
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
+
+    <string name="about_item">О приложении</string>
+    <string name="habit_list_item">Список привычек</string>
+
+    <string name="positive">Хорошие</string>
+    <string name="negative">Плохие</string>
 </resources>

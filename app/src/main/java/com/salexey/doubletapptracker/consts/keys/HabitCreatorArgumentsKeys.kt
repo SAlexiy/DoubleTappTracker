@@ -1,4 +1,4 @@
-package com.salexey.doubletapptracker.consts
+package com.salexey.doubletapptracker.consts.keys
 
 object HabitCreatorArgumentsKeys {
     const val newHabit = "newHabit"

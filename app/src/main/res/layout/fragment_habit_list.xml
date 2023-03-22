@@ -2,12 +2,25 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
-             android:layout_height="match_parent"
+             android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
              tools:context=".ui.screens.mainActivity.habitlist.HabitListFragment">
 
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/habit_list_compose_view"
+    <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="wrap_content">
+
+        <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabIndicatorColor="@color/purple_500"/>
+
+        <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/fragment_habit_list_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+    </LinearLayout>
+
 
 </FrameLayout>

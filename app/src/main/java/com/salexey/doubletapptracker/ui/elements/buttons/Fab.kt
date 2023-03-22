@@ -33,7 +33,7 @@ fun Fab(onClick: ()-> Unit) {
             .clickable { onClick() },
             contentAlignment = Alignment.Center
         ){
-            val vector = ImageVector.vectorResource(id = R.drawable.baseline_add_24)
+            val vector = ImageVector.vectorResource(id = R.drawable.ic_add_black_24)
 
             Image(
                 vector,

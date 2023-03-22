@@ -1,12 +1,16 @@
 package com.salexey.doubletapptracker.room
 
 import androidx.room.*
+import com.salexey.doubletapptracker.consts.values.TypeValues
 import com.salexey.doubletapptracker.datamodel.Habit
 
 @Dao
 interface HabitDao {
     @Query("SELECT * FROM habit")
     suspend fun getAll(): MutableList<Habit>
+
+    @Query("SELECT * FROM habit WHERE type = :type")
+    suspend fun getHabitsByType(type: String): MutableList<Habit>
 
     @Query("SELECT * FROM habit WHERE habitId = :habitId")
     suspend fun get(habitId: String): Habit
@@ -22,4 +26,5 @@ interface HabitDao {
 
     @Delete
     suspend fun delete(habit: Habit)
+
 }

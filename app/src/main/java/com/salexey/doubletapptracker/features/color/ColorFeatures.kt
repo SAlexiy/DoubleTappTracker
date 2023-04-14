@@ -1,8 +1,8 @@
-package com.salexey.doubletapptracker.features
+package com.salexey.doubletapptracker.features.color
 
 import androidx.compose.ui.graphics.Color
 
-class ColorFeatures {
+object ColorFeatures {
     fun rgbToHsv(color: Color): List<Float> {
 
 

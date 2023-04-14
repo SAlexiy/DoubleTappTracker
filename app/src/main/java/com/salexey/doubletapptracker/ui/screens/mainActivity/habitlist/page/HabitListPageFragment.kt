@@ -6,22 +6,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.ui.unit.dp
 import androidx.navigation.findNavController
 import com.salexey.doubletapptracker.R
-import com.salexey.doubletapptracker.consts.keys.HabitCreatorArgumentsKeys
 import com.salexey.doubletapptracker.consts.keys.HabitListArgumentsKeys
-import com.salexey.doubletapptracker.consts.values.TypeValues
-import com.salexey.doubletapptracker.datamodel.Habit
-import com.salexey.doubletapptracker.room.AppDB
-import com.salexey.doubletapptracker.room.HabitRepository
-import com.salexey.doubletapptracker.ui.elements.buttons.Fab
+import com.salexey.doubletapptracker.consts.values.TypeValue
+import com.salexey.doubletapptracker.ui.elements.BottomSheet
+import com.salexey.doubletapptracker.ui.elements.buttons.StandardButton
 import com.salexey.doubletapptracker.ui.elements.list.habitlist.HabitList
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment.Companion.newBundle
+import com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.HabitListViewModel
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -31,22 +32,20 @@ import java.util.*
  * читает Habit из таблицы habit
  */
 class HabitListPageFragment : Fragment() {
-    private var type: String? = null
+    private var type: TypeValue? = null
 
-    private lateinit var viewModel: HabitListPageViewModel
-    private lateinit var db: AppDB
-    private lateinit var habitRepository: HabitRepository
+    private lateinit var viewModel: HabitListViewModel
 
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[HabitListPageViewModel::class.java]
+        viewModel = HabitListViewModel.getViewModel(context!!)
 
-        db = AppDB.getInstance(this@HabitListPageFragment.context!!)
-        habitRepository = HabitRepository(db.habitDao())
     }
 
+
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,27 +54,57 @@ class HabitListPageFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_habit_list_page, container, false).apply {
             findViewById<ComposeView>(R.id.habit_list_compose_view).setContent {
 
-                Column {
-                    val habitList = viewModel.habitList.collectAsState()
-                    HabitList(
-                        habitList = habitList.value,
-                        onClick = {
-                            findNavController().navigate(
-                                R.id.action_habitListFragment_to_habitCreatorFragment,
-                                it
-                            )
+
+                //bottom sheet
+                val state = rememberBottomSheetScaffoldState(bottomSheetState =
+                    BottomSheetState(BottomSheetValue.Collapsed)
+                )
+
+                val coroutineScope = rememberCoroutineScope()
+
+                BottomSheet(state,
+                    sheetContent = {
+
+                        Box(modifier = Modifier
+                            .height(400.dp)
+                            .fillMaxWidth()
+                            .background(color = Color.Blue)){
+
                         }
-                    )
-                }
 
+                    },
+                    screenContent = {
+                        Column {
+                            val habitList = viewModel.habitList.value.collectAsState()
+                            Row(){
+                                StandardButton(){
 
+                                    coroutineScope.launch {
 
-                Fab(onClick = {
-                    findNavController().navigate(
-                        R.id.action_habitListFragment_to_habitCreatorFragment,
-                        newBundle()
-                    )
-                })
+                                        if (state.bottomSheetState.isCollapsed){
+                                            viewModel.isFabView.setValue(false)
+                                            state.bottomSheetState.expand()
+                                        }else{
+                                            viewModel.isFabView.setValue(true)
+                                            state.bottomSheetState.collapse()
+                                        }
+                                    }
+                                }
+                            }
+
+                            HabitList(
+                                habitList = habitList.value,
+                                onClick = {
+                                    findNavController().navigate(
+                                        R.id.action_habitListFragment_to_habitCreatorFragment,
+                                        it
+                                    )
+                                }
+                            )
+
+                        }
+                    }
+                )
 
             }
         }
@@ -86,37 +115,30 @@ class HabitListPageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         arguments?.let {
-            type = it.getString(HabitListArgumentsKeys.type)
-        }
+            type = it.getString(HabitListArgumentsKeys.TYPE).let {str ->
 
-        viewLifecycleOwner.lifecycleScope.launch {
+                if (str != null) {
+                    TypeValue.valueOf(str)
+                } else{
+                    null
+                }
 
-            if (type != null){
-                viewModel.setHabitList(habitRepository.getHabitsByType(type!!))
-            } else  {
-                viewModel.setHabitList(habitRepository.getAllHabit())
             }
-
         }
-
     }
 
 
+
     companion object{
-        fun newInstance(type: String): HabitListPageFragment{
+        fun newInstance(type: TypeValue?): HabitListPageFragment{
             val fragment = HabitListPageFragment()
             val args = Bundle()
 
-            args.putString(HabitListArgumentsKeys.type, type)
-            fragment.arguments = args
+            type?.let {
 
-            return fragment
-        }
+                args.putString(HabitListArgumentsKeys.TYPE, it.name)
 
-        fun newInstance(): HabitListPageFragment{
-            val fragment = HabitListPageFragment()
-            val args = Bundle()
-
+            }
             fragment.arguments = args
 
             return fragment

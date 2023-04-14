@@ -30,4 +30,8 @@ data class Habit(
 
     @ColumnInfo
     var color: Int = Color.Transparent.toArgb()
-): Serializable
+): Serializable{
+    companion object{
+        
+    }
+}

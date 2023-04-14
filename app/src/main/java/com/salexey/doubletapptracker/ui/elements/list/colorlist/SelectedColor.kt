@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.salexey.doubletapptracker.features.ColorFeatures
+import com.salexey.doubletapptracker.features.color.ColorFeatures
 
 @Composable
 fun SelectedColor(color: Int){
@@ -32,8 +32,8 @@ fun SelectedColor(color: Int){
                 "${ Color(color).blue}")
 
 
-        Text("HSV: ${ ColorFeatures().rgbToHsv(Color(color))[0]}, " +
-                "${ ColorFeatures().rgbToHsv(Color(color))[1]}, " +
-                "${ ColorFeatures().rgbToHsv(Color(color))[2]}")
+        Text("HSV: ${ ColorFeatures.rgbToHsv(Color(color))[0]}, " +
+                "${ ColorFeatures.rgbToHsv(Color(color))[1]}, " +
+                "${ ColorFeatures.rgbToHsv(Color(color))[2]}")
     }
 }

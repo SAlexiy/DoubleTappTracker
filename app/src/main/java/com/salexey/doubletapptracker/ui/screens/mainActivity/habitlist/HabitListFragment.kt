@@ -1,17 +1,25 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.salexey.doubletapptracker.R
-import com.salexey.doubletapptracker.consts.keys.HabitListArgumentsKeys
-import kotlin.properties.Delegates
+import com.salexey.doubletapptracker.consts.values.TypeValue
+import com.salexey.doubletapptracker.ui.elements.buttons.Fab
+import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment
+import com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.page.HabitListPagerAdapter
 
 
 class HabitListFragment : Fragment() {
@@ -19,10 +27,18 @@ class HabitListFragment : Fragment() {
     private lateinit var pageAdapter: HabitListPagerAdapter
 
     lateinit var tabLayout: TabLayout
+    private lateinit var fab: ComposeView
+    private lateinit var viewModel: HabitListViewModel
 
-    private var tabNum by Delegates.notNull<Int>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        viewModel = HabitListViewModel.getViewModel(requireContext())
+    }
 
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -31,15 +47,32 @@ class HabitListFragment : Fragment() {
 
         pager = view.findViewById(R.id.fragment_habit_list_viewpager)
         tabLayout = view.findViewById(R.id.tabLayout)
+        fab = view.findViewById(R.id.fab)
 
         return view
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tabNum = savedInstanceState?.getInt(HabitListArgumentsKeys.tabNum) ?: 0
 
+        viewModel.getHabits()
+
+        fab.setContent {
+            Box {
+                val isFabView = viewModel.isFabView.value.collectAsState()
+
+                if (isFabView.value){
+                    Fab(onClick = {
+                        findNavController().navigate(
+                            R.id.action_habitListFragment_to_habitCreatorFragment,
+                            HabitCreatorFragment.newBundle()
+                        )
+                    })
+                }
+            }
+        }
 
         pageAdapter = HabitListPagerAdapter(this)
         pager.adapter = pageAdapter
@@ -49,18 +82,17 @@ class HabitListFragment : Fragment() {
 
         for (i in 0 until pageAdapter.itemCount){
             tabLayout.addTab(tabLayout.newTab().setText(
-                pageAdapter.getItemViewTitle(i)
+
+                resources.getString(TypeValue.values()[i].strId)
+
             ))
         }
-
-        pager.currentItem = tabNum
-        tabLayout.selectTab(tabLayout.getTabAt(tabNum))
 
 
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                tabNum = tab.position
                 pager.setCurrentItem(tab.position, false)
+                viewModel.isFabView.setValue(true)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab) {}
@@ -76,11 +108,6 @@ class HabitListFragment : Fragment() {
         })
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putInt(HabitListArgumentsKeys.tabNum, tabNum)
-    }
 
     companion object { }
 }

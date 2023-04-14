@@ -1,92 +1,132 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.salexey.doubletapptracker.consts.values.TypeValue
 import com.salexey.doubletapptracker.datamodel.Habit
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.salexey.doubletapptracker.features.flow.ValueStateFlow
+import com.salexey.doubletapptracker.room.AppDB
+import com.salexey.doubletapptracker.room.HabitRepository
+import kotlinx.coroutines.launch
 
-class HabitCreatorViewModel() : ViewModel() {
+class HabitCreatorViewModel(
+    private val appDB: AppDB
+) : ViewModel() {
 
-    //параметр для сохранения привычки
-    private val _habit = MutableStateFlow(Habit(habitId = ""))
-    val habit = _habit.asStateFlow()
-    fun setHabit(habit: Habit) {
-        _habit.value = habit
-    }
+    private val habitRepository= HabitRepository(appDB.habitDao())
+    val habit = ValueStateFlow(Habit(habitId = ""))
 
-    fun updateHabit() {
-        setHabit(Habit(
-            habitId = habit.value.habitId,
-            name = name.value,
-            description = description.value,
-            periodicity = periodicity.value,
-            priority = priority.value,
-            type = type.value,
-            color = color.value,
-        ))
-    }
-
-
-    //параметр для записи названия
-    private val _name = MutableStateFlow("")
-    val name = _name.asStateFlow()
-    fun setName(name: String) {
-        _name.value = name
-    }
-
-    //параметр для записи описания
-    private val _description = MutableStateFlow("")
-    val description = _description.asStateFlow()
-    fun setDescription(description: String) {
-        _description.value = description
-    }
-
-    //параметр для записи периодичности
-    private val _periodicity = MutableStateFlow("")
-    val periodicity = _periodicity.asStateFlow()
-    fun setPeriodicity(periodicity: String) {
-        _periodicity.value = periodicity
+    /**
+     * Обнавляет habit на текщие значения в view model
+     */
+    fun updateHabitParams() {
+        habit.setValue(
+            Habit(
+                habitId = habit.getValue().habitId,
+                name = name.getValue(),
+                description = description.getValue(),
+                periodicity = periodicity.getValue(),
+                priority = priority.getValue(),
+                type = type.getValue().value,
+                color = color.getValue(),
+            )
+        )
     }
 
 
-    //параметры для выбора приоритета
-    private val _priority = MutableStateFlow(0)
-    val priority = _priority.asStateFlow()
-    fun setPriority(priority: Int) {
-        _priority.value = priority
+    val name = ValueStateFlow("")
+    val description = ValueStateFlow("")
+    val periodicity = ValueStateFlow("")
+
+    val priority = ValueStateFlow(0)
+    val isSpinnerExpanded = ValueStateFlow(false)
+
+    val type = ValueStateFlow(TypeValue.POSITIVE)
+    val color = ValueStateFlow(Color.Transparent.toArgb())
+
+
+    /**
+     * обновление значение всех параметров
+     */
+    fun setParams(habit: Habit, typeValue: TypeValue) {
+        this.habit.setValue(habit)
+        name.setValue(habit.name)
+        description.setValue(habit.description)
+        periodicity.setValue(habit.periodicity)
+        priority.setValue(habit.priority)
+        color.setValue(habit.color)
+        type.setValue( typeValue )
     }
 
-    private val _spinnerExpanded = MutableStateFlow(false)
-    val spinnerExpanded = _spinnerExpanded.asStateFlow()
-    fun changeSpinnerExpanded(spinnerExpanded: Boolean) {
-        _spinnerExpanded.value = spinnerExpanded
+    /**
+     * Возвращает TypeValue с значением value.
+     * Если такого нет, возвращает TypeValue.POSITIVE
+     */
+    fun getValueType(value: String): TypeValue {
+        return try {
+            TypeValue.getTypeByValue(value)
+        } catch (e: IllegalArgumentException){
+            TypeValue.POSITIVE
+        }
     }
 
-    //параметры для выбора типа
-    private val _type = MutableStateFlow("")
-    val type = _type.asStateFlow()
-    fun setType(type: String) {
-        _type.value = type
+    /**
+     * удаляет привычку
+     */
+    fun deleteHabit(){
+        viewModelScope.launch {
+
+            habitRepository.deleteHabit(habit.getValue())
+        }
     }
 
-    //параметры для выбора цвета
-    private val _color = MutableStateFlow(Color.Transparent.toArgb())
-    val color = _color.asStateFlow()
-    fun setColor(color: Int) {
-        _color.value = color
+    /**
+     * создаёт привычку
+     */
+    fun insertHabit(){
+        viewModelScope.launch {
+
+            habitRepository.insertHabit(habit.getValue())
+        }
     }
 
+    /**
+     * обнавляет привычку
+     */
+    fun updateHabit(){
+        viewModelScope.launch {
 
-    //обновление всех параметров
-    fun setParams(habit: Habit) {
-        setHabit(habit)
-        setName(habit.name)
-        setDescription(habit.description)
-        setPeriodicity(habit.periodicity)
-        setPriority(habit.priority)
-        setColor(habit.color)
-        setType(habit.type)
+            habitRepository.updateHabit(habit.getValue())
+        }
+    }
+
+    companion object{
+        private var habitCreatorViewModel: HabitCreatorViewModel? = null
+
+        /**
+         * Возвращает экземпляр HabitCreatorViewModel.
+         *
+         * Если модель до этого не использовалась, создаётся новый экземпляр,
+         * иначе возвращает предыдущий
+         *
+         */
+        fun getViewModel(context: Context): HabitCreatorViewModel {
+
+            if (habitCreatorViewModel == null){
+                habitCreatorViewModel = createViewModel(context)
+            }
+
+            return habitCreatorViewModel!!
+        }
+
+
+        private fun createViewModel(context: Context): HabitCreatorViewModel {
+            val appDB = AppDB.getInstance(context)
+
+            return HabitCreatorViewModel(appDB)
+        }
     }
 }

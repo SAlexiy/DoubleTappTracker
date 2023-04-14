@@ -7,16 +7,12 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.navigation.NavigationView
 import com.salexey.doubletapptracker.R
+import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.ui.elements.MainDrawerHeader
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorViewModel
-import com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.page.HabitListPageViewModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,14 +22,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navigationDrawerLayout: DrawerLayout
     private lateinit var navigationDrawerView: NavigationView
 
-    private lateinit var habitCreatorViewModel: HabitCreatorViewModel
-    private lateinit var habitListPageViewModel: HabitListPageViewModel
-
+    private lateinit var db: AppDB
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
+
+        db = AppDB.getInstance(this)
 
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -47,14 +43,6 @@ class MainActivity : AppCompatActivity() {
         setupDrawerContent(navigationDrawerView)
 
         navController = this.findNavController(R.id.mainFragment)
-
-
-        if(savedInstanceState == null){
-
-            habitCreatorViewModel = ViewModelProvider(this)[HabitCreatorViewModel::class.java]
-            habitListPageViewModel = ViewModelProvider(this)[HabitListPageViewModel::class.java]
-
-        }
     }
 
 
@@ -91,14 +79,17 @@ class MainActivity : AppCompatActivity() {
     private fun selectDrawerItem(menuItem: MenuItem) {
 
         navController.navigate(
-            when (menuItem.itemId) {
+            resId = when (menuItem.itemId) {
                 R.id.habitListItem -> R.id.habitListFragment
                 R.id.aboutAppItem -> R.id.aboutAppFragment
                 else -> {R.id.habitListFragment}
             }
         )
 
+        if (menuItem.itemId == R.id.aboutAppFragment){
+            navController.backQueue.clear()
+        }
+
         navigationDrawerLayout.closeDrawers()
     }
-
 }

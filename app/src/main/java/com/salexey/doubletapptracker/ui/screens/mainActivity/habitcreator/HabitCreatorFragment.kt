@@ -21,14 +21,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.salexey.doubletapptracker.R
 import com.salexey.doubletapptracker.consts.keys.HabitCreatorArgumentsKeys
+import com.salexey.doubletapptracker.consts.values.TypeValue
 import com.salexey.doubletapptracker.datamodel.Habit
-import com.salexey.doubletapptracker.room.AppDB
-import com.salexey.doubletapptracker.room.HabitRepository
 import com.salexey.doubletapptracker.ui.elements.*
 import com.salexey.doubletapptracker.ui.elements.buttons.StandardButton
 import com.salexey.doubletapptracker.ui.elements.list.colorlist.ColorPicker
@@ -45,19 +43,18 @@ import java.util.UUID
 class HabitCreatorFragment : Fragment() {
 
     private lateinit var viewModel: HabitCreatorViewModel
-    private lateinit var db: AppDB
-    private lateinit var habitRepository: HabitRepository
 
+    private lateinit var habit: Habit
+    private lateinit var typeValue: TypeValue
 
 
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[HabitCreatorViewModel::class.java]
 
-        db = AppDB.getInstance(this@HabitCreatorFragment.context!!)
-        habitRepository = HabitRepository(db.habitDao())
+        viewModel = HabitCreatorViewModel.getViewModel(context!!)
+
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -86,64 +83,63 @@ class HabitCreatorFragment : Fragment() {
                 ) {
 
 
-                    val name = viewModel.name.collectAsState()
+
+                    //TODO перенести label в ресурсы
+                    val name = viewModel.name.value.collectAsState()
                     TextField(
                         label = "name",
                         textState = name.value,
-                        onValueChange = {viewModel.setName(it)}
+                        onValueChange = {viewModel.name.setValue(it)}
                     )
 
-                    val description = viewModel.description.collectAsState()
+                    val description = viewModel.description.value.collectAsState()
                     TextField(
                         label = "description",
                         textState = description.value,
-                        onValueChange = {viewModel.setDescription(it)}
+                        onValueChange = {viewModel.description.setValue(it)}
                     )
 
-                    val periodicity = viewModel.periodicity.collectAsState()
+                    val periodicity = viewModel.periodicity.value.collectAsState()
                     TextField(
                         label = "periodicity",
                         textState = periodicity.value,
-                        onValueChange = {viewModel.setPeriodicity(it)}
+                        onValueChange = {viewModel.periodicity.setValue(it)}
                     )
 
-                    val priority = viewModel.priority.collectAsState()
-                    val spinnerExpanded = viewModel.spinnerExpanded.collectAsState()
+                    val priority = viewModel.priority.value.collectAsState()
+                    val spinnerExpanded = viewModel.isSpinnerExpanded.value.collectAsState()
                     ExposedDropdownMenuBoxTypeHabit(
                         isExpanded = spinnerExpanded.value,
-                        changeSpinnerExpanded = { viewModel.changeSpinnerExpanded(it) },
+                        changeSpinnerExpanded = { viewModel.isSpinnerExpanded.setValue(it) },
                         selectedPriority = priority.value,
-                        onPriorityChange = { viewModel.setPriority(it) }
+                        onPriorityChange = { viewModel.priority.setValue(it) }
                     )
 
-                    val selectedType = viewModel.type.collectAsState()
+                    val selectedType = viewModel.type.value.collectAsState()
                     RadioButtons(
                         selectedType = selectedType.value,
-                        onTypeChange = {viewModel.setType(it)}
+                        onTypeChange = {viewModel.type.setValue(it)}
                     )
 
-                    val color = viewModel.color.collectAsState()
+                    val color = viewModel.color.value.collectAsState()
                     SelectedColor(color = color.value)
 
-                    ColorPicker(onColorChange = {viewModel.setColor(it)})
+                    ColorPicker(onColorChange = {viewModel.color.setValue(it)})
 
                     //кнопки "удалить" и "сохранить"
-                    val bool = arguments?.getBoolean(HabitCreatorArgumentsKeys.newHabit) ?: false
+                    val isNewHabit = arguments?.getBoolean(HabitCreatorArgumentsKeys.newHabit) ?: false
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 30.dp, vertical = 10.dp),
                         horizontalArrangement =  Arrangement.SpaceAround){
-                        if(!bool){
+                        if(!isNewHabit){
 
                             StandardButton(
                                 text = resources.getString(R.string.delete),
                                 buttonColor = Color.Red
                             ) {
-                                viewModel.updateHabit()
 
-                                viewLifecycleOwner.lifecycleScope.launch {
-                                    habitRepository.deleteHabit(viewModel.habit.value)
-                                }
+                                viewModel.deleteHabit()
 
                                 findNavController().navigate(
                                     R.id.action_habitCreatorFragment_to_habitListFragment
@@ -154,16 +150,12 @@ class HabitCreatorFragment : Fragment() {
                         StandardButton(
                             text = resources.getString(R.string.save),
                         ) {
-                            viewModel.updateHabit()
+                            viewModel.updateHabitParams()
 
-                            if(bool){
-                                viewLifecycleOwner.lifecycleScope.launch {
-                                    habitRepository.insertHabit(viewModel.habit.value)
-                                }
+                            if(isNewHabit){
+                                viewModel.insertHabit()
                             } else {
-                                viewLifecycleOwner.lifecycleScope.launch {
-                                    habitRepository.updateHabit(viewModel.habit.value)
-                                }
+                                viewModel.updateHabit()
                             }
 
                             findNavController().navigate(
@@ -172,10 +164,7 @@ class HabitCreatorFragment : Fragment() {
                         }
                     }
 
-
-
                 }
-
             }
         }
     }
@@ -184,36 +173,38 @@ class HabitCreatorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         arguments?.let {
-            viewModel.setParams(
-                it.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
-            )
+            habit = it.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
+            typeValue = viewModel.getValueType(habit.type)
         }
 
+        viewModel.setParams(
+            habit = habit,
+            typeValue = typeValue
+        )
     }
 
 
     companion object{
-
-        fun newBundle(habit: Habit) : Bundle{
+        fun newBundle(habit: Habit? = null) : Bundle {
+            var argHabit = habit
             val bundle = Bundle()
 
-            bundle.putSerializable(HabitCreatorArgumentsKeys.habit, habit)
-            bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, false)
+            if (argHabit == null){
 
-            return bundle
-        }
-
-        fun newBundle() : Bundle{
-            val bundle = Bundle()
-
-            bundle.putSerializable(
-                HabitCreatorArgumentsKeys.habit,
-                Habit(
+                argHabit = Habit(
                     habitId = UUID.randomUUID().toString(),
-                ))
-            bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, true)
+                )
+
+                bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, true)
+            } else {
+                bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, false)
+            }
+
+            bundle.putSerializable(HabitCreatorArgumentsKeys.habit, argHabit)
 
             return bundle
         }
+
+
     }
 }

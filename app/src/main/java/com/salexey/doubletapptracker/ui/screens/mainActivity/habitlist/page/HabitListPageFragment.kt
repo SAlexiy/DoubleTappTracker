@@ -114,7 +114,6 @@ class HabitListPageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         arguments?.let {
             type = it.getString(HabitListArgumentsKeys.TYPE).let {str ->
 

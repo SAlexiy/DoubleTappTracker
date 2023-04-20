@@ -1,18 +1,19 @@
 package com.salexey.doubletapptracker.room
 
 import com.salexey.doubletapptracker.datamodel.Habit
+import kotlinx.coroutines.flow.Flow
 
 class HabitRepository(private val habitDao: HabitDao) {
 
-    suspend fun getAllHabit(): MutableList<Habit> {
+    suspend fun getAllHabit(): Flow<MutableList<Habit>> {
         return habitDao.getAll()
     }
 
-    suspend fun getHabitsByType(type: String): MutableList<Habit> {
+    suspend fun getHabitsByType(type: String): Flow<MutableList<Habit>> {
         return habitDao.getHabitsByType(type)
     }
 
-    suspend fun getHabit(habitId: String): Habit {
+    suspend fun getHabit(habitId: String): Flow<Habit> {
         return habitDao.get(habitId)
     }
 

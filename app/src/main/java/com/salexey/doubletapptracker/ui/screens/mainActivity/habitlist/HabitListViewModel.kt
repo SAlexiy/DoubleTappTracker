@@ -1,6 +1,7 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist
 
 import android.content.Context
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.*
 import com.salexey.doubletapptracker.consts.values.TypeSort
 import com.salexey.doubletapptracker.consts.values.TypeValue
@@ -11,6 +12,9 @@ import com.salexey.doubletapptracker.features.sorter.HabitSorter
 import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.room.HabitRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class HabitListViewModel(
@@ -19,6 +23,7 @@ class HabitListViewModel(
 
     private val habitRepository= HabitRepository(appDB.habitDao())
 
+    var habitFlow: Flow<MutableList<Habit>> = flow {  }
     var fullHabitList = listOf<Habit>()
     val habitList = ValueStateFlow(mutableListOf<Habit>())
 
@@ -30,18 +35,27 @@ class HabitListViewModel(
     fun getHabits(type: TypeValue? = null){
         viewModelScope.launch {
             if (type != null){
-                habitList.setValue(habitRepository.getHabitsByType(type.value))
+                habitFlow = habitRepository.getHabitsByType(type.value)
                 fullHabitList = habitList.getValue()
             } else  {
-                habitList.setValue(habitRepository.getAllHabit())
+               habitFlow = habitRepository.getAllHabit()
+            }
+        }
+
+        viewModelScope.launch {
+            habitFlow.collect{
+
+                habitList.setValue(it)
+
             }
         }
     }
 
 
 
+
     val sortType = ValueStateFlow<TypeSort>(TypeSort.DEFAULT)
-    val filterPriority = ValueStateFlow(-1)
+    val filterPriority = ValueStateFlow(2)
     val filterColor = ValueStateFlow(-1)
 
     fun setFilter(fullHabitList: MutableList<Habit>): List<Habit> {

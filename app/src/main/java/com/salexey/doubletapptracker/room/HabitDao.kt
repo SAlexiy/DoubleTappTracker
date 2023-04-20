@@ -2,6 +2,7 @@ package com.salexey.doubletapptracker.room
 
 import androidx.room.*
 import com.salexey.doubletapptracker.datamodel.Habit
+import kotlinx.coroutines.flow.Flow
 
 /**
  * DAO для работы с таблицей habit
@@ -13,19 +14,19 @@ interface HabitDao {
      * получает все записи из таблицы
      */
     @Query("SELECT * FROM habit")
-    suspend fun getAll(): MutableList<Habit>
+    fun getAll(): Flow<MutableList<Habit>>
 
     /**
      * получает все записи из таблицы, в которых type равен параметру
      */
     @Query("SELECT * FROM habit WHERE type = :type")
-    suspend fun getHabitsByType(type: String): MutableList<Habit>
+    fun getHabitsByType(type: String): Flow<MutableList<Habit>>
 
     /**
      * получает habit по id
      */
     @Query("SELECT * FROM habit WHERE habitId = :habitId")
-    suspend fun get(habitId: String): Habit
+    fun get(habitId: String): Flow<Habit>
 
     /**
      * записывает в таблицу habit

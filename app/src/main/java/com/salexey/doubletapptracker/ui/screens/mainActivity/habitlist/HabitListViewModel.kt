@@ -10,6 +10,7 @@ import com.salexey.doubletapptracker.features.flow.ValueStateFlow
 import com.salexey.doubletapptracker.features.sorter.HabitSorter
 import com.salexey.doubletapptracker.room.AppDB
 import com.salexey.doubletapptracker.room.HabitRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class HabitListViewModel(
@@ -38,12 +39,13 @@ class HabitListViewModel(
     }
 
 
+
     val sortType = ValueStateFlow<TypeSort>(TypeSort.DEFAULT)
     val filterPriority = ValueStateFlow(-1)
     val filterColor = ValueStateFlow(-1)
 
-    fun setFilter(): List<Habit> {
-        var list = fullHabitList
+    fun setFilter(fullHabitList: MutableList<Habit>): List<Habit> {
+        var list: List<Habit> = fullHabitList
 
 
         if (sortType.getValue() != TypeSort.DEFAULT){

@@ -93,7 +93,7 @@ class HabitListPageFragment : Fragment() {
                             }
 
                             HabitList(
-                                habitList = habitList.value,
+                                habitList = viewModel.setFilter(habitList.value),
                                 onClick = {
                                     findNavController().navigate(
                                         R.id.action_habitListFragment_to_habitCreatorFragment,
@@ -113,6 +113,7 @@ class HabitListPageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
         arguments?.let {
             type = it.getString(HabitListArgumentsKeys.TYPE).let {str ->

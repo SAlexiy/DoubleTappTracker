@@ -4,15 +4,14 @@ import com.salexey.doubletapptracker.R
 
 enum class TypeValue(
     val strId: Int,
-    val value: String
+    val value: Int
 ) {
-    POSITIVE(strId = R.string.positive, value = "positive"),
-    NEGATIVE(strId = R.string.negative, value = "negative");
+    NEGATIVE(strId = R.string.negative, value = 0),
+    POSITIVE(strId = R.string.positive, value = 1);
 
 
-    //TODO спросить можно ли так делать
     companion object{
-        fun getTypeByValue(value: String): TypeValue {
+        fun getTypeByValue(value: Int): TypeValue {
 
             for (type in TypeValue.values()){
                 if (value == type.value){

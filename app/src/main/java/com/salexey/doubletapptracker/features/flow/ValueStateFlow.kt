@@ -1,5 +1,6 @@
 package com.salexey.doubletapptracker.features.flow
 
+import com.salexey.datamodels.habit.Habit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -7,7 +8,7 @@ class ValueStateFlow<T>(value: T) {
     private val _value = MutableStateFlow<T>(value)
     val value = _value.asStateFlow()
 
-    fun setValue(value: T) { 
+    fun setValue(value: T) {
         _value.value = value
     }
 

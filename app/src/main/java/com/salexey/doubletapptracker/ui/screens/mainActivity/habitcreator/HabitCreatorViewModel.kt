@@ -1,23 +1,34 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator
 
-import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.salexey.datamodels.habit.Habit
 import com.salexey.doubletapptracker.consts.values.TypeValue
-import com.salexey.doubletapptracker.datamodel.Habit
 import com.salexey.doubletapptracker.features.flow.ValueStateFlow
-import com.salexey.doubletapptracker.room.AppDB
-import com.salexey.doubletapptracker.room.HabitRepository
+import com.salexey.habit_manager.HabitRepository
 import kotlinx.coroutines.launch
+import java.util.*
 
 class HabitCreatorViewModel(
-    private val appDB: AppDB
+    private val habitRepository: HabitRepository
 ) : ViewModel() {
 
-    private val habitRepository= HabitRepository(appDB.habitDao())
-    val habit = ValueStateFlow(Habit(habitId = ""))
+    val habit = ValueStateFlow(Habit(
+        uid = "",
+        color = 0,
+        count = 0,
+        date = 0,
+        description = "",
+        doneDates = mutableListOf(),
+        frequency = 0,
+        priority = 0,
+        title = "",
+        type = 0
+    ))
 
     /**
      * Обнавляет habit на текщие значения в view model
@@ -25,13 +36,16 @@ class HabitCreatorViewModel(
     fun updateHabitParams() {
         habit.setValue(
             Habit(
-                habitId = habit.getValue().habitId,
-                name = name.getValue(),
+                uid = habit.getValue().uid,
+                title = name.getValue(),
                 description = description.getValue(),
-                periodicity = periodicity.getValue(),
+                frequency = frequency.getValue(),
                 priority = priority.getValue(),
-                type = type.getValue().value,
+                type = type.getValue(),
                 color = color.getValue(),
+                date = 0,
+                doneDates = mutableListOf(),
+                count = 0
             )
         )
     }
@@ -39,33 +53,34 @@ class HabitCreatorViewModel(
 
     val name = ValueStateFlow("")
     val description = ValueStateFlow("")
-    val periodicity = ValueStateFlow("")
+    val frequency = ValueStateFlow(0)
+    val isFrequencySpinnerExpanded = ValueStateFlow(false)
 
     val priority = ValueStateFlow(0)
-    val isSpinnerExpanded = ValueStateFlow(false)
+    val isPrioritySpinnerExpanded = ValueStateFlow(false)
 
-    val type = ValueStateFlow(TypeValue.POSITIVE)
+    val type = ValueStateFlow(0)
     val color = ValueStateFlow(Color.Transparent.toArgb())
 
 
     /**
      * обновление значение всех параметров
      */
-    fun setParams(habit: Habit, typeValue: TypeValue) {
+    fun setParams(habit: Habit) {
         this.habit.setValue(habit)
-        name.setValue(habit.name)
+        name.setValue(habit.title)
         description.setValue(habit.description)
-        periodicity.setValue(habit.periodicity)
+        frequency.setValue(habit.frequency)
         priority.setValue(habit.priority)
         color.setValue(habit.color)
-        type.setValue( typeValue )
+        type.setValue( habit.type )
     }
 
     /**
      * Возвращает TypeValue с значением value.
      * Если такого нет, возвращает TypeValue.POSITIVE
      */
-    fun getValueType(value: String): TypeValue {
+    fun getValueType(value: Int): TypeValue {
         return try {
             TypeValue.getTypeByValue(value)
         } catch (e: IllegalArgumentException){
@@ -80,12 +95,14 @@ class HabitCreatorViewModel(
         viewModelScope.launch {
 
             habitRepository.deleteHabit(habit.getValue())
+
         }
     }
 
     /**
      * создаёт привычку
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun insertHabit(){
         viewModelScope.launch {
 
@@ -96,6 +113,7 @@ class HabitCreatorViewModel(
     /**
      * обнавляет привычку
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     fun updateHabit(){
         viewModelScope.launch {
 
@@ -113,20 +131,18 @@ class HabitCreatorViewModel(
          * иначе возвращает предыдущий
          *
          */
-        fun getViewModel(context: Context): HabitCreatorViewModel {
+        fun getViewModel(habitRepository: HabitRepository): HabitCreatorViewModel {
 
             if (habitCreatorViewModel == null){
-                habitCreatorViewModel = createViewModel(context)
+                habitCreatorViewModel = createViewModel(habitRepository)
             }
 
             return habitCreatorViewModel!!
         }
 
 
-        private fun createViewModel(context: Context): HabitCreatorViewModel {
-            val appDB = AppDB.getInstance(context)
-
-            return HabitCreatorViewModel(appDB)
+        private fun createViewModel(habitRepository: HabitRepository): HabitCreatorViewModel {
+            return HabitCreatorViewModel(habitRepository)
         }
     }
 }

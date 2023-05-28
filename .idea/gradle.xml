@@ -4,12 +4,20 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/datamodels" />
+            <option value="$PROJECT_DIR$/core/network" />
+            <option value="$PROJECT_DIR$/core/roomdb" />
+            <option value="$PROJECT_DIR$/domain" />
+            <option value="$PROJECT_DIR$/domain/changes-manager" />
+            <option value="$PROJECT_DIR$/domain/habit-manager" />
+            <option value="$PROJECT_DIR$/domain/network-tracker" />
+            <option value="$PROJECT_DIR$/domain/shared-preference" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -16,11 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun StandardButton(text: String = "text", textColor: Color = Color.Black,
+fun StandardButton(modifier: Modifier = Modifier, text: String = "text", textColor: Color = Color.Black,
                    width: Int = 146, height: Int = 36, buttonColor: Color = Color.White,
                    onClick: ()-> Unit){
     Box(
-        modifier = Modifier
+        modifier = modifier
             .width(width.dp)
             .height(height.dp)
             .shadow(

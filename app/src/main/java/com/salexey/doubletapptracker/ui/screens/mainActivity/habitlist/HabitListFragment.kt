@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -15,11 +15,15 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import com.salexey.doubletapptracker.MainApplication
 import com.salexey.doubletapptracker.R
 import com.salexey.doubletapptracker.consts.values.TypeValue
 import com.salexey.doubletapptracker.ui.elements.buttons.Fab
 import com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator.HabitCreatorFragment
 import com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist.page.HabitListPagerAdapter
+import com.salexey.habit_manager.HabitRepository
+import java.util.logging.Logger
+import javax.inject.Inject
 
 
 class HabitListFragment : Fragment() {
@@ -30,11 +34,16 @@ class HabitListFragment : Fragment() {
     private lateinit var fab: ComposeView
     private lateinit var viewModel: HabitListViewModel
 
+    @Inject
+    lateinit var habitRepository: HabitRepository
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = HabitListViewModel.getViewModel(requireContext())
+        (requireActivity().application as MainApplication).applicationComponent.inject(this)
+
+        viewModel = HabitListViewModel.getViewModel(habitRepository)
     }
 
 
@@ -91,6 +100,9 @@ class HabitListFragment : Fragment() {
 
         tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
+
+                viewModel.filterTypeValue.setValue(tab.position)
+
                 pager.setCurrentItem(tab.position, false)
                 viewModel.isFabView.setValue(true)
             }
@@ -107,7 +119,4 @@ class HabitListFragment : Fragment() {
             }
         })
     }
-
-
-    companion object { }
 }

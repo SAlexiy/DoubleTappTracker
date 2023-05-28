@@ -1,11 +1,13 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitcreator
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -21,18 +23,17 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.salexey.datamodels.habit.Habit
+import com.salexey.doubletapptracker.MainApplication
 import com.salexey.doubletapptracker.R
 import com.salexey.doubletapptracker.consts.keys.HabitCreatorArgumentsKeys
-import com.salexey.doubletapptracker.consts.values.TypeValue
-import com.salexey.doubletapptracker.datamodel.Habit
 import com.salexey.doubletapptracker.ui.elements.*
 import com.salexey.doubletapptracker.ui.elements.buttons.StandardButton
 import com.salexey.doubletapptracker.ui.elements.list.colorlist.ColorPicker
 import com.salexey.doubletapptracker.ui.elements.list.colorlist.SelectedColor
-import kotlinx.coroutines.launch
-import java.util.UUID
+import com.salexey.habit_manager.HabitRepository
+import javax.inject.Inject
 
 
 /**
@@ -45,18 +46,21 @@ class HabitCreatorFragment : Fragment() {
     private lateinit var viewModel: HabitCreatorViewModel
 
     private lateinit var habit: Habit
-    private lateinit var typeValue: TypeValue
 
+    @Inject
+    lateinit var habitRepository: HabitRepository
 
     @SuppressLint("UseRequireInsteadOfGet")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
 
-        viewModel = HabitCreatorViewModel.getViewModel(context!!)
+        (requireActivity().application as MainApplication).applicationComponent.inject(this)
+        viewModel = HabitCreatorViewModel.getViewModel(habitRepository)
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -83,42 +87,48 @@ class HabitCreatorFragment : Fragment() {
                 ) {
 
 
-
-                    //TODO перенести label в ресурсы
                     val name = viewModel.name.value.collectAsState()
                     TextField(
-                        label = "name",
+                        label = "Name",
                         textState = name.value,
                         onValueChange = {viewModel.name.setValue(it)}
                     )
 
                     val description = viewModel.description.value.collectAsState()
                     TextField(
-                        label = "description",
+                        label = "Description",
                         textState = description.value,
                         onValueChange = {viewModel.description.setValue(it)}
                     )
 
-                    val periodicity = viewModel.periodicity.value.collectAsState()
-                    TextField(
-                        label = "periodicity",
-                        textState = periodicity.value,
-                        onValueChange = {viewModel.periodicity.setValue(it)}
+                    val frequency = viewModel.frequency.value.collectAsState()
+                    val frequencySinnerExpanded = viewModel.isFrequencySpinnerExpanded.value.collectAsState()
+                    ExposedDropdownMenuBoxTypeHabit(
+                        text = "Frequency",
+                        isExpanded = frequencySinnerExpanded.value,
+                        changeSpinnerExpanded = { viewModel.isFrequencySpinnerExpanded.setValue(it) },
+                        selectedPriority = frequency.value,
+                        onPriorityChange = { viewModel.frequency.setValue(it) },
+                        valueList = listOf(1,2,3,4,5,6,7)
                     )
 
                     val priority = viewModel.priority.value.collectAsState()
-                    val spinnerExpanded = viewModel.isSpinnerExpanded.value.collectAsState()
+                    val prioritySpinnerExpanded = viewModel.isPrioritySpinnerExpanded.value.collectAsState()
                     ExposedDropdownMenuBoxTypeHabit(
-                        isExpanded = spinnerExpanded.value,
-                        changeSpinnerExpanded = { viewModel.isSpinnerExpanded.setValue(it) },
+                        text = "Priority",
+                        isExpanded = prioritySpinnerExpanded.value,
+                        changeSpinnerExpanded = { viewModel.isPrioritySpinnerExpanded.setValue(it) },
                         selectedPriority = priority.value,
-                        onPriorityChange = { viewModel.priority.setValue(it) }
+                        onPriorityChange = { viewModel.priority.setValue(it) },
+                        valueList = listOf(0,1,2)
                     )
 
                     val selectedType = viewModel.type.value.collectAsState()
                     RadioButtons(
+                        text = "Type",
                         selectedType = selectedType.value,
-                        onTypeChange = {viewModel.type.setValue(it)}
+                        onTypeChange = {viewModel.type.setValue(it)},
+                        type = listOf(0,1)
                     )
 
                     val color = viewModel.color.value.collectAsState()
@@ -174,12 +184,10 @@ class HabitCreatorFragment : Fragment() {
 
         arguments?.let {
             habit = it.getSerializable(HabitCreatorArgumentsKeys.habit) as Habit
-            typeValue = viewModel.getValueType(habit.type)
         }
 
         viewModel.setParams(
-            habit = habit,
-            typeValue = typeValue
+            habit = habit
         )
     }
 
@@ -192,7 +200,16 @@ class HabitCreatorFragment : Fragment() {
             if (argHabit == null){
 
                 argHabit = Habit(
-                    habitId = UUID.randomUUID().toString(),
+                    uid = "",
+                    color = 0,
+                    count = 0,
+                    date = 0,
+                    description = "",
+                    doneDates = mutableListOf(),
+                    frequency = 0,
+                    priority = 0,
+                    title = "",
+                    type = 0
                 )
 
                 bundle.putBoolean(HabitCreatorArgumentsKeys.newHabit, true)

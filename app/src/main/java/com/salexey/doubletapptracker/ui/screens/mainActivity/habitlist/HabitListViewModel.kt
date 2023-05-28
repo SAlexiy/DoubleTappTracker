@@ -1,82 +1,57 @@
 package com.salexey.doubletapptracker.ui.screens.mainActivity.habitlist
 
-import android.content.Context
-import androidx.compose.runtime.rememberCoroutineScope
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
-import com.salexey.doubletapptracker.consts.values.TypeSort
-import com.salexey.doubletapptracker.consts.values.TypeValue
-import com.salexey.doubletapptracker.datamodel.Habit
-import com.salexey.doubletapptracker.features.filter.HabitFilter
+import com.salexey.datamodels.habit.Habit
 import com.salexey.doubletapptracker.features.flow.ValueStateFlow
-import com.salexey.doubletapptracker.features.sorter.HabitSorter
-import com.salexey.doubletapptracker.room.AppDB
-import com.salexey.doubletapptracker.room.HabitRepository
-import kotlinx.coroutines.delay
+import com.salexey.habit_manager.HabitRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import java.util.logging.Logger
 
 class HabitListViewModel(
-    private val appDB: AppDB
+    private val habitRepository: HabitRepository
 ) : ViewModel() {
+    val logger = Logger.getLogger("HabitListViewModel")
 
-    private val habitRepository= HabitRepository(appDB.habitDao())
 
-    var habitFlow: Flow<MutableList<Habit>> = flow {  }
-    var fullHabitList = listOf<Habit>()
+    private var habitFlow: Flow<MutableList<Habit>> = flow {  }
     val habitList = ValueStateFlow(mutableListOf<Habit>())
 
     val isFabView = ValueStateFlow(true)
 
-    /**
-     * меняет значение habitList, на список habit, полученный из бд по значению type
-     */
-    fun getHabits(type: TypeValue? = null){
+
+    fun getHabits(){
+
         viewModelScope.launch {
-            if (type != null){
-                habitFlow = habitRepository.getHabitsByType(type.value)
-                fullHabitList = habitList.getValue()
-            } else  {
-               habitFlow = habitRepository.getAllHabit()
-            }
+            habitFlow = habitRepository.getAllHabit()
         }
 
         viewModelScope.launch {
             habitFlow.collect{
-
                 habitList.setValue(it)
-
             }
         }
     }
 
-
-
-
-    val sortType = ValueStateFlow<TypeSort>(TypeSort.DEFAULT)
-    val filterPriority = ValueStateFlow(2)
-    val filterColor = ValueStateFlow(-1)
-
-    fun setFilter(fullHabitList: MutableList<Habit>): List<Habit> {
-        var list: List<Habit> = fullHabitList
-
-
-        if (sortType.getValue() != TypeSort.DEFAULT){
-            list = HabitSorter.byType(list ,sortType.getValue())
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateHabitDone(habit: Habit){
+        viewModelScope.launch {
+            habitRepository.updateHabitDone(habit)
         }
-
-
-        if (filterColor.getValue() != -1)
-            list = HabitFilter.byColor(list, filterColor.getValue())
-
-        if (filterPriority.getValue() != -1)
-            list = HabitFilter.byPriority(list, filterPriority.getValue())
-
-
-        return list
     }
 
+
+
+    val filterTypeValue = ValueStateFlow(0)
+    val filterPriority = ValueStateFlow(-1)
+    val isPrioritySpinnerExpanded = ValueStateFlow(false)
+
+    val filterColor = ValueStateFlow(-1)
+
+    val priority = ValueStateFlow(0)
 
     companion object{
         private var habitListPageViewModel: HabitListViewModel? = null
@@ -88,20 +63,19 @@ class HabitListViewModel(
          * иначе возвращает предыдущий
          *
          */
-        fun getViewModel(context: Context): HabitListViewModel {
+        fun getViewModel(habitRepository: HabitRepository): HabitListViewModel {
 
             if (habitListPageViewModel == null){
-                habitListPageViewModel = createViewModel(context)
+                habitListPageViewModel = createViewModel(habitRepository)
             }
 
             return habitListPageViewModel!!
         }
 
 
-        private fun createViewModel(context: Context): HabitListViewModel {
-            val appDB = AppDB.getInstance(context)
+        private fun createViewModel(habitRepository: HabitRepository): HabitListViewModel {
 
-            return HabitListViewModel(appDB)
+            return HabitListViewModel(habitRepository)
         }
 
     }

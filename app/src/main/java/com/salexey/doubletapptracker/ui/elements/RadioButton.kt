@@ -20,17 +20,15 @@ import com.salexey.doubletapptracker.consts.values.TypeValue
 
 @Composable
 fun RadioButtons(
-    selectedType: TypeValue, onTypeChange: (TypeValue) -> Unit
+    selectedType: Int, onTypeChange: (Int) -> Unit,
+    text: String, type: List<Int>
 ) {
 
-    val ty = TypeValue.POSITIVE
-
-    val type = listOf(TypeValue.POSITIVE, TypeValue.NEGATIVE)
     val interactionSource = remember { MutableInteractionSource() }
 
     Column(modifier = Modifier
         .padding(10.dp)) {
-        Text(text = "Type", fontSize = 13.sp, color = Color.Black.copy(alpha = 0.54f),
+        Text(text = text, fontSize = 13.sp, color = Color.Black.copy(alpha = 0.54f),
             modifier = Modifier
                 .padding(start = 40.dp, bottom = 5.dp)
         )
@@ -54,7 +52,7 @@ fun RadioButtons(
                     onClick = null
                 )
 
-                Text( text = stringResource(typeValue.strId), fontSize = 18.sp,
+                Text( text = stringResource(TypeValue.getTypeByValue(typeValue).strId), fontSize = 18.sp,
                     modifier = Modifier.padding(start = 7.dp)
                 )
             }

@@ -14,3 +14,12 @@ dependencyResolutionManagement {
 }
 rootProject.name = "DoubleTappTracker"
 include ':app'
+
+include ':core:network'
+include ':core:roomdb'
+include ':core:datamodels'
+
+include ':domain:habit-manager'
+include ':domain:changes-manager'
+include ':domain:network-tracker'
+include ':domain:shared-preference'

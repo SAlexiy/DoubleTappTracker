@@ -1,6 +1,7 @@
 package com.salexey.doubletapptracker.ui.elements
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,10 +17,11 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExposedDropdownMenuBoxTypeHabit(
+    text: String, valueList: List<Int>,
     isExpanded: Boolean, changeSpinnerExpanded: (Boolean) -> Unit,
-    selectedPriority: Int, onPriorityChange: (Int) -> Unit
+    selectedPriority: Int, onPriorityChange: (Int) -> Unit,
+
 ) {
-    val priorityValueList = arrayOf(0, 1, 2, 3, 4)
 
     val focusedColor = Color.Blue
     val unfocusedColor = Color.Black
@@ -37,10 +39,10 @@ fun ExposedDropdownMenuBoxTypeHabit(
             }
         ) {
             TextField(
-                value = "$selectedPriority",
+                value = " ${if (selectedPriority != -1) selectedPriority else "Все"}",
                 onValueChange = {},
                 readOnly = true,
-                label = { Text(text = "Priority") },
+                label = { Text(text = text) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 colors = TextFieldDefaults.textFieldColors(
                     cursorColor = focusedColor,
@@ -59,7 +61,7 @@ fun ExposedDropdownMenuBoxTypeHabit(
                 expanded = isExpanded,
                 onDismissRequest = { changeSpinnerExpanded(false) }
             ) {
-                priorityValueList.forEach { item ->
+                valueList.forEach { item ->
                     DropdownMenuItem(
                         content = { Text(text = item.toString()) },
                         onClick = {

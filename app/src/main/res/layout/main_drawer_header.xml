@@ -9,5 +9,5 @@
     <androidx.compose.ui.platform.ComposeView
             android:id="@+id/main_drawer_compose_view"
             android:layout_width="match_parent"
-            android:layout_height="100dp" tools:ignore="MissingConstraints"/>
+            android:layout_height="300dp" tools:ignore="MissingConstraints"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
